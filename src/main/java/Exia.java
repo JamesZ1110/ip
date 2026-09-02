@@ -3,6 +3,8 @@ import java.util.Scanner;
 public class Exia {
     public static void main(String[] args) {
         String line = "____________________________________________________________";
+        String[] tasks = new String[100];
+        int taskCount = 0;
 
         System.out.println(line);
         System.out.println("Hello! I'm Exia");
@@ -21,8 +23,20 @@ public class Exia {
                 break;
             }
 
+            if (input.equals("list")) {
+                System.out.println(line);
+                for (int i = 0; i < taskCount; i++) {
+                    System.out.println((i + 1) + ". " + tasks[i]);
+                }
+                System.out.println(line);
+                continue;
+            }
+
+            tasks[taskCount] = input;
+            taskCount++;
+
             System.out.println(line);
-            System.out.println(input);
+            System.out.println("added: " + input);
             System.out.println(line);
         }
 
