@@ -3,7 +3,7 @@ import java.util.Scanner;
 public class Exia {
     public static void main(String[] args) {
         String line = "____________________________________________________________";
-        String[] tasks = new String[100];
+        Task[] tasks = new Task[100];
         int taskCount = 0;
 
         System.out.println(line);
@@ -26,13 +26,24 @@ public class Exia {
             if (input.equals("list")) {
                 System.out.println(line);
                 for (int i = 0; i < taskCount; i++) {
-                    System.out.println((i + 1) + ". " + tasks[i]);
+                    System.out.println((i + 1) + "." + tasks[i]);
                 }
                 System.out.println(line);
                 continue;
             }
 
-            tasks[taskCount] = input;
+            if (input.startsWith("done ")) {
+                int taskNumber = Integer.parseInt(input.substring(5));
+                tasks[taskNumber - 1].markAsDone();
+
+                System.out.println(line);
+                System.out.println("Nice! I've marked this task as done:");
+                System.out.println(tasks[taskNumber - 1]);
+                System.out.println(line);
+                continue;
+            }
+
+            tasks[taskCount] = new Task(input);
             taskCount++;
 
             System.out.println(line);
