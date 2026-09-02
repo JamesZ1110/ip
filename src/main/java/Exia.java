@@ -4,6 +4,7 @@ public class Exia {
     public static void main(String[] args) {
         String line = "____________________________________________________________";
 
+        System.out.println(line);
         System.out.println("Hello! I'm Exia");
         System.out.println("What can I do for you?");
         System.out.println(line);
@@ -21,7 +22,7 @@ public class Exia {
             }
 
             System.out.println(line);
-            System.out.println("I don't understand yet, but I heard: " + input);
+            System.out.println(input);
             System.out.println(line);
         }
 
