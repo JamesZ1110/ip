@@ -29,11 +29,55 @@ public class Exia {
                     continue;
                 }
 
+                if (input.startsWith("todo ")) {
+                    tasks[taskCount] = createToDo(input);
+                    taskCount++;
+                    showAddedTask(tasks[taskCount - 1]);
+                    continue;
+                }
+
+                if (input.startsWith("deadline ")) {
+                    tasks[taskCount] = createDeadline(input);
+                    taskCount++;
+                    showAddedTask(tasks[taskCount - 1]);
+                    continue;
+                }
+
+                if (input.startsWith("event ")) {
+                    tasks[taskCount] = createEvent(input);
+                    taskCount++;
+                    showAddedTask(tasks[taskCount - 1]);
+                    continue;
+                }
+
                 tasks[taskCount] = new Task(input);
                 taskCount++;
-                showAddedTask(input);
+                showAddedTask(tasks[taskCount - 1]);
             }
         }
+    }
+
+    public static ToDo createToDo(String input) {
+        String description = input.substring(5);
+        return new ToDo(description);
+    }
+
+    public static Deadline createDeadline(String input) {
+        String content = input.substring(9);
+        String[] parts = content.split(" /by ", 2);
+        String description = parts[0];
+        String by = parts[1];
+        return new Deadline(description, by);
+    }
+
+    public static Event createEvent(String input) {
+        String content = input.substring(6);
+        String[] fromSplit = content.split(" /from ", 2);
+        String description = fromSplit[0];
+        String[] toSplit = fromSplit[1].split(" /to ", 2);
+        String from = toSplit[0];
+        String to = toSplit[1];
+        return new Event(description, from, to);
     }
 
     public static void showGreeting() {
@@ -68,9 +112,10 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void showAddedTask(String input) {
+    public static void showAddedTask(Task task) {
         System.out.println(LINE);
-        System.out.println("added: " + input);
+        System.out.println("Got it. I've added this task:");
+        System.out.println(task);
         System.out.println(LINE);
     }
 }
