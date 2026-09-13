@@ -14,69 +14,111 @@ public class Exia {
             while (scanner.hasNextLine()) {
                 String input = scanner.nextLine();
 
-                if (input.equals("bye")) {
-                    showGoodbye();
-                    break;
-                }
+                try {
+                    if (input.equals("bye")) {
+                        showGoodbye();
+                        break;
+                    }
 
-                if (input.equals("list")) {
-                    showTaskList(tasks, taskCount);
-                    continue;
-                }
+                    if (input.equals("list")) {
+                        showTaskList(tasks, taskCount);
+                        continue;
+                    }
 
-                if (input.startsWith("done ")) {
-                    markTaskAsDone(tasks, input);
-                    continue;
-                }
+                    if (input.startsWith("done ")) {
+                        markTaskAsDone(tasks, input, taskCount);
+                        continue;
+                    }
 
-                if (input.startsWith("todo ")) {
-                    tasks[taskCount] = createToDo(input);
+                    Task task = createTask(input);
+                    tasks[taskCount] = task;
                     taskCount++;
-                    showAddedTask(tasks[taskCount - 1]);
-                    continue;
+                    showAddedTask(task);
+                } catch (ExiaException e) {
+                    showError(e.getMessage());
                 }
-
-                if (input.startsWith("deadline ")) {
-                    tasks[taskCount] = createDeadline(input);
-                    taskCount++;
-                    showAddedTask(tasks[taskCount - 1]);
-                    continue;
-                }
-
-                if (input.startsWith("event ")) {
-                    tasks[taskCount] = createEvent(input);
-                    taskCount++;
-                    showAddedTask(tasks[taskCount - 1]);
-                    continue;
-                }
-
-                tasks[taskCount] = new Task(input);
-                taskCount++;
-                showAddedTask(tasks[taskCount - 1]);
             }
         }
     }
 
-    public static ToDo createToDo(String input) {
-        String description = input.substring(5);
+    public static Task createTask(String input) throws ExiaException {
+        if (input.equals("todo")) {
+            throw new ExiaException("The description of a todo cannot be empty.");
+        }
+
+        if (input.equals("deadline")) {
+            throw new ExiaException("The description of a deadline cannot be empty.");
+        }
+
+        if (input.equals("event")) {
+            throw new ExiaException("The description of an event cannot be empty.");
+        }
+
+        if (input.startsWith("todo ")) {
+            return createToDo(input);
+        }
+
+        if (input.startsWith("deadline ")) {
+            return createDeadline(input);
+        }
+
+        if (input.startsWith("event ")) {
+            return createEvent(input);
+        }
+
+        throw new ExiaException("I'm sorry, but I don't know what that means :-(");
+    }
+
+    public static ToDo createToDo(String input) throws ExiaException {
+        String description = input.substring(5).trim();
+
+        if (description.isEmpty()) {
+            throw new ExiaException("The description of a todo cannot be empty.");
+        }
+
         return new ToDo(description);
     }
 
-    public static Deadline createDeadline(String input) {
-        String content = input.substring(9);
+    public static Deadline createDeadline(String input) throws ExiaException {
+        String content = input.substring(9).trim();
+
+        if (content.isEmpty()) {
+            throw new ExiaException("The description of a deadline cannot be empty.");
+        }
+
         String[] parts = content.split(" /by ", 2);
-        String description = parts[0];
-        String by = parts[1];
+
+        if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
+            throw new ExiaException("Please use: deadline DESCRIPTION /by TIME");
+        }
+
+        String description = parts[0].trim();
+        String by = parts[1].trim();
         return new Deadline(description, by);
     }
 
-    public static Event createEvent(String input) {
-        String content = input.substring(6);
+    public static Event createEvent(String input) throws ExiaException {
+        String content = input.substring(6).trim();
+
+        if (content.isEmpty()) {
+            throw new ExiaException("The description of an event cannot be empty.");
+        }
+
         String[] fromSplit = content.split(" /from ", 2);
-        String description = fromSplit[0];
+
+        if (fromSplit.length < 2 || fromSplit[0].trim().isEmpty()) {
+            throw new ExiaException("Please use: event DESCRIPTION /from START /to END");
+        }
+
         String[] toSplit = fromSplit[1].split(" /to ", 2);
-        String from = toSplit[0];
-        String to = toSplit[1];
+
+        if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
+            throw new ExiaException("Please use: event DESCRIPTION /from START /to END");
+        }
+
+        String description = fromSplit[0].trim();
+        String from = toSplit[0].trim();
+        String to = toSplit[1].trim();
         return new Event(description, from, to);
     }
 
@@ -101,8 +143,25 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void markTaskAsDone(Task[] tasks, String input) {
-        int taskNumber = Integer.parseInt(input.substring(5));
+    public static void markTaskAsDone(Task[] tasks, String input, int taskCount) throws ExiaException {
+        String taskNumberText = input.substring(5).trim();
+
+        if (taskNumberText.isEmpty()) {
+            throw new ExiaException("Please tell me which task number to mark as done.");
+        }
+
+        int taskNumber;
+
+        try {
+            taskNumber = Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException e) {
+            throw new ExiaException("Task number must be a number.");
+        }
+
+        if (taskNumber < 1 || taskNumber > taskCount) {
+            throw new ExiaException("That task number does not exist.");
+        }
+
         Task task = tasks[taskNumber - 1];
         task.markAsDone();
 
@@ -116,6 +175,12 @@ public class Exia {
         System.out.println(LINE);
         System.out.println("Got it. I've added this task:");
         System.out.println(task);
+        System.out.println(LINE);
+    }
+
+    public static void showError(String message) {
+        System.out.println(LINE);
+        System.out.println("OOPS!!! " + message);
         System.out.println(LINE);
     }
 }
