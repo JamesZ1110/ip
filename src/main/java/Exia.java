@@ -1,12 +1,11 @@
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Exia {
     private static final String LINE = "____________________________________________________________";
-    private static final int MAX_TASKS = 100;
 
     public static void main(String[] args) {
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        ArrayList<Task> tasks = new ArrayList<>();
 
         showGreeting();
 
@@ -21,18 +20,22 @@ public class Exia {
                     }
 
                     if (input.equals("list")) {
-                        showTaskList(tasks, taskCount);
+                        showTaskList(tasks);
                         continue;
                     }
 
                     if (input.startsWith("done ")) {
-                        markTaskAsDone(tasks, input, taskCount);
+                        markTaskAsDone(tasks, input);
+                        continue;
+                    }
+
+                    if (input.equals("delete") || input.startsWith("delete ")) {
+                        deleteTask(tasks, input);
                         continue;
                     }
 
                     Task task = createTask(input);
-                    tasks[taskCount] = task;
-                    taskCount++;
+                    tasks.add(task);
                     showAddedTask(task);
                 } catch (ExiaException e) {
                     showError(e.getMessage());
@@ -135,15 +138,15 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void showTaskList(Task[] tasks, int taskCount) {
+    public static void showTaskList(ArrayList<Task> tasks) {
         System.out.println(LINE);
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + "." + tasks.get(i));
         }
         System.out.println(LINE);
     }
 
-    public static void markTaskAsDone(Task[] tasks, String input, int taskCount) throws ExiaException {
+    public static void markTaskAsDone(ArrayList<Task> tasks, String input) throws ExiaException {
         String taskNumberText = input.substring(5).trim();
 
         if (taskNumberText.isEmpty()) {
@@ -158,16 +161,44 @@ public class Exia {
             throw new ExiaException("Task number must be a number.");
         }
 
-        if (taskNumber < 1 || taskNumber > taskCount) {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new ExiaException("That task number does not exist.");
         }
 
-        Task task = tasks[taskNumber - 1];
+        Task task = tasks.get(taskNumber - 1);
         task.markAsDone();
 
         System.out.println(LINE);
         System.out.println("Nice! I've marked this task as done:");
         System.out.println(task);
+        System.out.println(LINE);
+    }
+
+    public static void deleteTask(ArrayList<Task> tasks, String input) throws ExiaException {
+        String taskNumberText = input.substring(6).trim();
+
+        if (taskNumberText.isEmpty()) {
+            throw new ExiaException("Please tell me which task number to delete.");
+        }
+
+        int taskNumber;
+
+        try {
+            taskNumber = Integer.parseInt(taskNumberText);
+        } catch (NumberFormatException e) {
+            throw new ExiaException("Task number must be a number.");
+        }
+
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
+            throw new ExiaException("That task number does not exist.");
+        }
+
+        Task removedTask = tasks.remove(taskNumber - 1);
+
+        System.out.println(LINE);
+        System.out.println("Noted. I've removed this task:");
+        System.out.println(removedTask);
+        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
         System.out.println(LINE);
     }
 
