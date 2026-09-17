@@ -1,14 +1,22 @@
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Exia {
     private static final String LINE = "____________________________________________________________";
-    private static final int MAX_TASKS = 100;
 
     public static void main(String[] args) {
-        Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
-
         showGreeting();
+
+        Storage storage = new Storage("data/exia.txt");
+        ArrayList<Task> tasks;
+
+        try {
+            tasks = storage.loadTasks();
+        } catch (IOException e) {
+            showError(e.getMessage());
+            tasks = new ArrayList<>();
+        }
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
@@ -21,21 +29,24 @@ public class Exia {
                     }
 
                     if (input.equals("list")) {
-                        showTaskList(tasks, taskCount);
+                        showTaskList(tasks);
                         continue;
                     }
 
                     if (input.startsWith("done ")) {
-                        markTaskAsDone(tasks, input, taskCount);
+                        markTaskAsDone(tasks, input);
+                        storage.saveTasks(tasks);
                         continue;
                     }
 
                     Task task = createTask(input);
-                    tasks[taskCount] = task;
-                    taskCount++;
+                    tasks.add(task);
+                    storage.saveTasks(tasks);
                     showAddedTask(task);
                 } catch (ExiaException e) {
                     showError(e.getMessage());
+                } catch (IOException e) {
+                    showError("Unable to save tasks.");
                 }
             }
         }
@@ -112,7 +123,8 @@ public class Exia {
 
         String[] toSplit = fromSplit[1].split(" /to ", 2);
 
-        if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
+        if (toSplit.length < 2 || toSplit[0].trim().isEmpty()
+                || toSplit[1].trim().isEmpty()) {
             throw new ExiaException("Please use: event DESCRIPTION /from START /to END");
         }
 
@@ -135,19 +147,21 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void showTaskList(Task[] tasks, int taskCount) {
+    public static void showTaskList(ArrayList<Task> tasks) {
         System.out.println(LINE);
-        for (int i = 0; i < taskCount; i++) {
-            System.out.println((i + 1) + "." + tasks[i]);
+        for (int i = 0; i < tasks.size(); i++) {
+            System.out.println((i + 1) + "." + tasks.get(i));
         }
         System.out.println(LINE);
     }
 
-    public static void markTaskAsDone(Task[] tasks, String input, int taskCount) throws ExiaException {
+    public static void markTaskAsDone(ArrayList<Task> tasks, String input)
+            throws ExiaException {
         String taskNumberText = input.substring(5).trim();
 
         if (taskNumberText.isEmpty()) {
-            throw new ExiaException("Please tell me which task number to mark as done.");
+            throw new ExiaException(
+                    "Please tell me which task number to mark as done.");
         }
 
         int taskNumber;
@@ -158,11 +172,11 @@ public class Exia {
             throw new ExiaException("Task number must be a number.");
         }
 
-        if (taskNumber < 1 || taskNumber > taskCount) {
+        if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new ExiaException("That task number does not exist.");
         }
 
-        Task task = tasks[taskNumber - 1];
+        Task task = tasks.get(taskNumber - 1);
         task.markAsDone();
 
         System.out.println(LINE);
