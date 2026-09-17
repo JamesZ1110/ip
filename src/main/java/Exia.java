@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -5,9 +6,17 @@ public class Exia {
     private static final String LINE = "____________________________________________________________";
 
     public static void main(String[] args) {
-        ArrayList<Task> tasks = new ArrayList<>();
-
         showGreeting();
+
+        Storage storage = new Storage("data/exia.txt");
+        ArrayList<Task> tasks;
+
+        try {
+            tasks = storage.loadTasks();
+        } catch (IOException e) {
+            showError(e.getMessage());
+            tasks = new ArrayList<>();
+        }
 
         try (Scanner scanner = new Scanner(System.in)) {
             while (scanner.hasNextLine()) {
@@ -26,19 +35,24 @@ public class Exia {
 
                     if (input.startsWith("done ")) {
                         markTaskAsDone(tasks, input);
+                        storage.saveTasks(tasks);
                         continue;
                     }
 
                     if (input.equals("delete") || input.startsWith("delete ")) {
                         deleteTask(tasks, input);
+                        storage.saveTasks(tasks);
                         continue;
                     }
 
                     Task task = createTask(input);
                     tasks.add(task);
+                    storage.saveTasks(tasks);
                     showAddedTask(task);
                 } catch (ExiaException e) {
                     showError(e.getMessage());
+                } catch (IOException e) {
+                    showError("Unable to save tasks.");
                 }
             }
         }
@@ -46,15 +60,18 @@ public class Exia {
 
     public static Task createTask(String input) throws ExiaException {
         if (input.equals("todo")) {
-            throw new ExiaException("The description of a todo cannot be empty.");
+            throw new ExiaException(
+                    "The description of a todo cannot be empty.");
         }
 
         if (input.equals("deadline")) {
-            throw new ExiaException("The description of a deadline cannot be empty.");
+            throw new ExiaException(
+                    "The description of a deadline cannot be empty.");
         }
 
         if (input.equals("event")) {
-            throw new ExiaException("The description of an event cannot be empty.");
+            throw new ExiaException(
+                    "The description of an event cannot be empty.");
         }
 
         if (input.startsWith("todo ")) {
@@ -69,30 +86,36 @@ public class Exia {
             return createEvent(input);
         }
 
-        throw new ExiaException("I'm sorry, but I don't know what that means :-(");
+        throw new ExiaException(
+                "I'm sorry, but I don't know what that means :-(");
     }
 
     public static ToDo createToDo(String input) throws ExiaException {
         String description = input.substring(5).trim();
 
         if (description.isEmpty()) {
-            throw new ExiaException("The description of a todo cannot be empty.");
+            throw new ExiaException(
+                    "The description of a todo cannot be empty.");
         }
 
         return new ToDo(description);
     }
 
-    public static Deadline createDeadline(String input) throws ExiaException {
+    public static Deadline createDeadline(String input)
+            throws ExiaException {
         String content = input.substring(9).trim();
 
         if (content.isEmpty()) {
-            throw new ExiaException("The description of a deadline cannot be empty.");
+            throw new ExiaException(
+                    "The description of a deadline cannot be empty.");
         }
 
         String[] parts = content.split(" /by ", 2);
 
-        if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
-            throw new ExiaException("Please use: deadline DESCRIPTION /by TIME");
+        if (parts.length < 2 || parts[0].trim().isEmpty()
+                || parts[1].trim().isEmpty()) {
+            throw new ExiaException(
+                    "Please use: deadline DESCRIPTION /by TIME");
         }
 
         String description = parts[0].trim();
@@ -104,19 +127,23 @@ public class Exia {
         String content = input.substring(6).trim();
 
         if (content.isEmpty()) {
-            throw new ExiaException("The description of an event cannot be empty.");
+            throw new ExiaException(
+                    "The description of an event cannot be empty.");
         }
 
         String[] fromSplit = content.split(" /from ", 2);
 
         if (fromSplit.length < 2 || fromSplit[0].trim().isEmpty()) {
-            throw new ExiaException("Please use: event DESCRIPTION /from START /to END");
+            throw new ExiaException(
+                    "Please use: event DESCRIPTION /from START /to END");
         }
 
         String[] toSplit = fromSplit[1].split(" /to ", 2);
 
-        if (toSplit.length < 2 || toSplit[0].trim().isEmpty() || toSplit[1].trim().isEmpty()) {
-            throw new ExiaException("Please use: event DESCRIPTION /from START /to END");
+        if (toSplit.length < 2 || toSplit[0].trim().isEmpty()
+                || toSplit[1].trim().isEmpty()) {
+            throw new ExiaException(
+                    "Please use: event DESCRIPTION /from START /to END");
         }
 
         String description = fromSplit[0].trim();
@@ -146,11 +173,13 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void markTaskAsDone(ArrayList<Task> tasks, String input) throws ExiaException {
+    public static void markTaskAsDone(
+            ArrayList<Task> tasks, String input) throws ExiaException {
         String taskNumberText = input.substring(5).trim();
 
         if (taskNumberText.isEmpty()) {
-            throw new ExiaException("Please tell me which task number to mark as done.");
+            throw new ExiaException(
+                    "Please tell me which task number to mark as done.");
         }
 
         int taskNumber;
@@ -162,7 +191,8 @@ public class Exia {
         }
 
         if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new ExiaException("That task number does not exist.");
+            throw new ExiaException(
+                    "That task number does not exist.");
         }
 
         Task task = tasks.get(taskNumber - 1);
@@ -174,11 +204,13 @@ public class Exia {
         System.out.println(LINE);
     }
 
-    public static void deleteTask(ArrayList<Task> tasks, String input) throws ExiaException {
+    public static void deleteTask(
+            ArrayList<Task> tasks, String input) throws ExiaException {
         String taskNumberText = input.substring(6).trim();
 
         if (taskNumberText.isEmpty()) {
-            throw new ExiaException("Please tell me which task number to delete.");
+            throw new ExiaException(
+                    "Please tell me which task number to delete.");
         }
 
         int taskNumber;
@@ -190,7 +222,8 @@ public class Exia {
         }
 
         if (taskNumber < 1 || taskNumber > tasks.size()) {
-            throw new ExiaException("That task number does not exist.");
+            throw new ExiaException(
+                    "That task number does not exist.");
         }
 
         Task removedTask = tasks.remove(taskNumber - 1);
@@ -198,7 +231,8 @@ public class Exia {
         System.out.println(LINE);
         System.out.println("Noted. I've removed this task:");
         System.out.println(removedTask);
-        System.out.println("Now you have " + tasks.size() + " tasks in the list.");
+        System.out.println(
+                "Now you have " + tasks.size() + " tasks in the list.");
         System.out.println(LINE);
     }
 
