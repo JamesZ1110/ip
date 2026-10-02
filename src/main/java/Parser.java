@@ -1,6 +1,6 @@
 public class Parser {
     public enum CommandType {
-        BYE, LIST, DONE, DELETE, TODO, DEADLINE, EVENT, UNKNOWN
+        BYE, LIST, DONE, DELETE, FIND, TODO, DEADLINE, EVENT, UNKNOWN
     }
 
     public static CommandType getCommandType(String input) {
@@ -15,6 +15,9 @@ public class Parser {
         }
         if (input.equals("delete") || input.startsWith("delete ")) {
             return CommandType.DELETE;
+        }
+        if (input.equals("find") || input.startsWith("find ")) {
+            return CommandType.FIND;
         }
         if (input.equals("todo") || input.startsWith("todo ")) {
             return CommandType.TODO;
@@ -46,6 +49,18 @@ public class Parser {
         } catch (NumberFormatException e) {
             throw new ExiaException("Task number must be a number.");
         }
+    }
+
+    public static String parseFindKeyword(String input)
+            throws ExiaException {
+        String keyword = getContent(input, "find");
+
+        if (keyword.isEmpty()) {
+            throw new ExiaException(
+                    "Please tell me what to find.");
+        }
+
+        return keyword;
     }
 
     public static Task createTask(String input) throws ExiaException {
