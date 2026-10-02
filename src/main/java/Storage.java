@@ -4,13 +4,27 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Loads tasks from a file and saves tasks to a file.
+ */
 public class Storage {
     private final Path filePath;
 
+    /**
+     * Creates storage that uses the specified file.
+     *
+     * @param filePath path of the task data file
+     */
     public Storage(String filePath) {
         this.filePath = Path.of(filePath);
     }
 
+    /**
+     * Loads all tasks from the data file.
+     *
+     * @return tasks stored in the file, or an empty list if it does not exist
+     * @throws IOException if the file cannot be read or contains invalid data
+     */
     public ArrayList<Task> loadTasks() throws IOException {
         ArrayList<Task> tasks = new ArrayList<>();
 
@@ -43,6 +57,12 @@ public class Storage {
         return tasks;
     }
 
+    /**
+     * Saves all tasks to the data file.
+     *
+     * @param tasks tasks to save
+     * @throws IOException if the tasks cannot be written
+     */
     public void saveTasks(ArrayList<Task> tasks) throws IOException {
         Files.createDirectories(filePath.getParent());
         List<String> lines = new ArrayList<>();

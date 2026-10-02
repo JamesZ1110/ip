@@ -1,8 +1,20 @@
+/**
+ * Parses user input into commands and command arguments.
+ */
 public class Parser {
+    /**
+     * Represents the commands supported by Exia.
+     */
     public enum CommandType {
         BYE, LIST, DONE, DELETE, FIND, TODO, DEADLINE, EVENT, UNKNOWN
     }
 
+    /**
+     * Identifies the type of a user command.
+     *
+     * @param input complete user input
+     * @return type of the command
+     */
     public static CommandType getCommandType(String input) {
         if (input.equals("bye")) {
             return CommandType.BYE;
@@ -31,6 +43,14 @@ public class Parser {
         return CommandType.UNKNOWN;
     }
 
+    /**
+     * Extracts a task number from a command.
+     *
+     * @param input complete user input
+     * @param command command word preceding the task number
+     * @return parsed task number
+     * @throws ExiaException if the task number is missing or invalid
+     */
     public static int parseTaskNumber(String input, String command)
             throws ExiaException {
         String taskNumberText = input.substring(command.length()).trim();
@@ -51,6 +71,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Extracts the search keyword from a find command.
+     *
+     * @param input complete user input
+     * @return search keyword
+     * @throws ExiaException if the keyword is missing
+     */
     public static String parseFindKeyword(String input)
             throws ExiaException {
         String keyword = getContent(input, "find");
@@ -63,6 +90,13 @@ public class Parser {
         return keyword;
     }
 
+    /**
+     * Creates a task from an add-task command.
+     *
+     * @param input complete user input
+     * @return task represented by the command
+     * @throws ExiaException if the command is invalid
+     */
     public static Task createTask(String input) throws ExiaException {
         return switch (getCommandType(input)) {
             case TODO -> createToDo(input);
