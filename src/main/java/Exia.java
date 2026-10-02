@@ -59,6 +59,9 @@ public class Exia {
             case DELETE:
                 deleteTask(input);
                 break;
+            case FIND:
+                findTasks(input);
+                break;
             case TODO:
             case DEADLINE:
             case EVENT:
@@ -86,6 +89,12 @@ public class Exia {
         Task task = tasks.delete(taskNumber);
         storage.saveTasks(tasks.getTasks());
         ui.showDeletedTask(task, tasks.size());
+    }
+
+    private void findTasks(String input) throws ExiaException {
+        String keyword = Parser.parseFindKeyword(input);
+        TaskList matchingTasks = tasks.find(keyword);
+        ui.showMatchingTasks(matchingTasks);
     }
 
     private void addTask(String input)

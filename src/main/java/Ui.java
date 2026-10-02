@@ -35,6 +35,17 @@ public class Ui {
         System.out.println(LINE);
     }
 
+    public void showMatchingTasks(TaskList matchingTasks) {
+        System.out.println(LINE);
+        System.out.println("Here are the matching tasks in your list:");
+
+        for (int i = 0; i < matchingTasks.size(); i++) {
+            System.out.println((i + 1) + "." + matchingTasks.get(i));
+        }
+
+        System.out.println(LINE);
+    }
+
     public void showMarkedTask(Task task) {
         System.out.println(LINE);
         System.out.println("Nice! I've marked this task as done:");

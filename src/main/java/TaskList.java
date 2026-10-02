@@ -38,6 +38,19 @@ public class TaskList {
         return tasks.remove(taskNumber - 1);
     }
 
+    public TaskList find(String keyword) {
+        ArrayList<Task> matchingTasks = new ArrayList<>();
+        String lowerKeyword = keyword.toLowerCase();
+
+        for (Task task : tasks) {
+            if (task.getDescription().toLowerCase().contains(lowerKeyword)) {
+                matchingTasks.add(task);
+            }
+        }
+
+        return new TaskList(matchingTasks);
+    }
+
     private Task getByNumber(int taskNumber) throws ExiaException {
         if (taskNumber < 1 || taskNumber > tasks.size()) {
             throw new ExiaException("That task number does not exist.");
